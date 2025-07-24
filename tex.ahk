@@ -1,4 +1,4 @@
-﻿#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 
 ;---
 ; 記号マップ
@@ -95,19 +95,20 @@ OnChar(ih, char) {
 
     ; 候補の再構築
     suggestions := makeSuggestions(currentInput)
-    ; 
-    if !suggestions.Length
-        selectedIndex := 0
-    else if selectedIndex > suggestions.Length
+    ; 入力時に候補が減るので selectedIndex の値は場合分けで対処
+    ; …と思ったが、候補が0になると復帰できなくなるので 1 に固定
+    if suggestions.Length {
         selectedIndex := 1
+    }
+    else {
+        selectedIndex := 0
+    }
 
     ; Tooltip 更新
-    if currentInput {
-        if suggestions.Length
-            showTooltip(suggestions, selectedIndex)
-        else
-            showTooltip(["一致なし"], 0)
-    }
+    if selectedIndex
+        showTooltip(suggestions, selectedIndex)
+    else
+        showTooltip([], 0)
 }
 
 
@@ -133,6 +134,14 @@ OnVKey(ih, vk, sc) {
         currentInput := SubStr(currentInput, 1, -1)
         suggestions := makeSuggestions(currentInput)
         ; 削除によって候補は減らないので selectedIndex はそのままで問題ない
+        ; …と思ったが、候補が0になったあと復活する処理がうまくできないので
+        ; 1 に固定する
+        if suggestions.Length {
+            selectedIndex := 1
+        }
+        else {
+            selectedIndex := 0
+        }
         showTooltip(suggestions, selectedIndex)
     }
 }
